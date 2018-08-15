@@ -171,7 +171,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   }
 
   public static void main(String[] args) {
-    OpenBisClient o = new OpenBisClient("admin", "abc", "https://test.qbic.de:443");
+    OpenBisClient o = new OpenBisClient("admin", "saina4", "https://144.41.39.97:8443");
     o.login();
   }
 
