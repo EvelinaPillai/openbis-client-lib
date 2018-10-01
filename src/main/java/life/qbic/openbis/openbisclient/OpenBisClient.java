@@ -6,9 +6,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import org.apache.commons.text.WordUtils;
 import ch.systemsx.cisd.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.common.exceptions.InvalidAuthenticationException;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
-import ch.systemsx.cisd.common.shared.basic.string.StringUtils;
+import ch.systemsx.cisd.common.spring.HttpInvokerUtils;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.dss.generic.shared.api.v1.FileInfoDssDTO;
@@ -43,7 +43,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria.MatchCl
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchSubCriteria;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Vocabulary;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
+//import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.id.project.ProjectIdentifierId;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.id.sample.SampleIdentifierId;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.IQueryApiServer;
@@ -56,8 +56,9 @@ import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
  * written by Emanuel Schmid and the OpenbisConnector written by Bela Hullar
  * 
  * @author wojnar
+ * @param <var>
  */
-public class OpenBisClient implements IOpenBisClient, Serializable {
+public class OpenBisClient<var> implements IOpenBisClient, Serializable {
   /**
    * 
    */
@@ -76,6 +77,8 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   private String password;
   private String serverURL;
 
+  
+  
   private final String dss = "DSS1";
 
   public OpenBisClient(String loginid, String password, String serverURL) {
@@ -85,6 +88,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     this.facade = null;
   }
 
+ 
   /**
    * Checks if we are logged in
    */
@@ -1143,7 +1147,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   public List<String> listVocabularyTermsForProperty(PropertyType property) {
     List<String> terms = new ArrayList<String>();
     ControlledVocabularyPropertyType controlled_vocab = (ControlledVocabularyPropertyType) property;
-    for (VocabularyTerm term : controlled_vocab.getTerms()) {
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType.VocabularyTerm term : controlled_vocab.getTerms()) {
       terms.add(term.getLabel().toString());
     }
     return terms;
@@ -1160,7 +1164,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     ControlledVocabularyPropertyType controlled_vocab =
         (ControlledVocabularyPropertyType) propertyType;
 
-    for (VocabularyTerm term : controlled_vocab.getTerms()) {
+    for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.ControlledVocabularyPropertyType.VocabularyTerm term : controlled_vocab.getTerms()) {
       if (term.getCode().equals(propertyValue)) {
         return term.getLabel();
       }
@@ -1607,7 +1611,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     for (Vocabulary v : facade.listVocabularies()) {
       if (v.getCode().equals(vocabularyCode)) {
         Map<String, String> map = new HashMap<String, String>();
-        for (VocabularyTerm t : v.getTerms()) {
+        for (ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.VocabularyTerm t : v.getTerms()) {
           map.put(t.getLabel(), t.getCode());
         }
         return map;
@@ -1834,18 +1838,24 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     // filter all samples by types
     List<Sample> samples = new ArrayList<Sample>();
     for (Sample s : allSamples) {
-      if (sampleType.equals(s.getSampleTypeCode()))
-        samples.add(s);
+    	if(sampleType.equals("Q_TEST_SAMPLE")&&(s.getSampleTypeCode().equals("Q_CFH_ELEMENTS")||s.getSampleTypeCode().equals("Q_CFH_NMINS"))) //TODO for all our experiments CFH 
+   		  samples.add(s);
+    	if (sampleType.equals(s.getSampleTypeCode())) 
+    	  samples.add(s);
     }
+      
+    
     // sort remaining samples-
-    // Arrays.sort(samples);
+    //Arrays.sort(samples);
+    samples.sort((s1, s2 )-> s1.getSampleTypeCode().compareTo(s2.getSampleTypeCode()) );
 
     Vocabulary voc = getVocabulary("Q_NCBI_TAXONOMY");
     String header = "QBiC Code\tSecondary Name\tLab ID\tSample Type\tAttributes\tSource";
     if (!sampleType.equals("Q_BIOLOGICAL_ENTITY"))
       header += "\tSource Name(s)\tSource Lab ID(s)";
-    if (sampleType.equals("Q_TEST_SAMPLE"))
+    if (sampleType.equals("Q_TEST_SAMPLE")|| sampleType.equals("Q_CFH_ELEMENTS")) {
       header += "\tExtract Code(s)\tExtract Name(s)\tExtract Lab ID(s)";
+      }
     res.add(header);
     for (Sample sample : samples) {
       String code = sample.getCode();
@@ -1878,8 +1888,8 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
         row.add(HelperMethods.getPropertyOfSamples(sources, "Q_SECONDARY_NAME"));
         row.add(HelperMethods.getPropertyOfSamples(sources, "Q_EXTERNALDB_ID"));
       }
-      if (sampleType.equals("Q_TEST_SAMPLE")) {
-        Set<Sample> extracts = HelperMethods.fetchAncestorsOfType(new ArrayList<Sample>(Arrays.asList(sample)),
+      if (sampleType.equals("Q_TEST_SAMPLE")) { 
+    	  Set<Sample> extracts = HelperMethods.fetchAncestorsOfType(new ArrayList<Sample>(Arrays.asList(sample)),
                 "Q_BIOLOGICAL_SAMPLE");
         List<String> codeL = new ArrayList<String>();
         for (Sample s : extracts) {
