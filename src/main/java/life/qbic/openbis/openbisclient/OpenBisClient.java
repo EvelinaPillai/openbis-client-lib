@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -309,8 +310,11 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
      * List<Sample> foundSamples = this.getOpenbisInfoService().searchForSamples(sessionToken, sc);
      * return foundSamples;
      */
-    return this.getOpenbisInfoService().listSamplesForExperiment(sessionToken,
-        experimentIdentifier);
+    List<Sample> list =  this.getOpenbisInfoService().listSamplesForExperiment(sessionToken,
+            experimentIdentifier);
+    Collections.sort(list, (Sample s1, Sample s2) -> s1.getCode().compareTo(s2.getCode()));
+    
+    return list;
   }
 
   /**
