@@ -1837,10 +1837,13 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     List<Sample> allSamples = facade.searchForSamples(sc, fetchOptions);
     // filter all samples by types
     List<Sample> samples = new ArrayList<Sample>();
-    for (Sample s : allSamples) {
-      if (sampleType.equals(s.getSampleTypeCode()))
-        samples.add(s);
-    }
+		for (Sample s : allSamples) {
+			if (sampleType.equals("Q_TEST_SAMPLE")
+					&& (s.getSampleTypeCode().equals("Q_CFH_ELEMENTS") || s.getSampleTypeCode().equals("Q_CFH_NMINS"))) // TODO for all of our experiments CFH
+				samples.add(s);
+			if (sampleType.equals(s.getSampleTypeCode()))
+				samples.add(s);
+		}
     // sort remaining samples-
     // Arrays.sort(samples);
 
@@ -1848,7 +1851,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     String header = "QBiC Code\tSecondary Name\tLab ID\tSample Type\tAttributes\tSource";
     if (!sampleType.equals("Q_BIOLOGICAL_ENTITY"))
       header += "\tSource Name(s)\tSource Lab ID(s)";
-    if (sampleType.equals("Q_TEST_SAMPLE"))
+    if (sampleType.equals("Q_TEST_SAMPLE") || sampleType.equals("Q_CFH_ELEMENTS") || sampleType.equals("Q_CFH_NMINS")) // TODO for all of our experiments CFH
       header += "\tExtract Code(s)\tExtract Name(s)\tExtract Lab ID(s)";
     res.add(header);
     for (Sample sample : samples) {
