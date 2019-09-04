@@ -172,7 +172,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   }
 
   public static void main(String[] args) {
-    OpenBisClient o = new OpenBisClient("admin", "abc", "https://test.qbic.de:443");
+    OpenBisClient o = new OpenBisClient("admin", "abc", "https://localhost:8443");
     o.login();
   }
 
@@ -1382,7 +1382,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   public URL getDataStoreDownloadURL(String dataSetCode, String openbisFilename)
       throws MalformedURLException {
     String base = this.serverURL.split(".de")[0] + ".de";
-    String downloadURL = base + ":444";
+    String downloadURL = base + ":8444"; //cfh 444 to 8444
     downloadURL += "/datastore_server/";
 
     downloadURL += dataSetCode;
@@ -1396,7 +1396,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
   public URL getDataStoreDownloadURLLessGeneric(String dataSetCode, String openbisFilename)
       throws MalformedURLException {
     String base = this.serverURL.split(".de")[0] + ".de";
-    String downloadURL = base + ":444";
+    String downloadURL = base + ":8444"; //cfh 444 to 8444
     downloadURL += "/datastore_server/";
 
     downloadURL += dataSetCode;
