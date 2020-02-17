@@ -1839,7 +1839,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     List<Sample> samples = new ArrayList<Sample>();
 		for (Sample s : allSamples) {
 			if (sampleType.equals("Q_TEST_SAMPLE")
-					&& (s.getSampleTypeCode().equals("Q_CFH_ELEMENTS") || s.getSampleTypeCode().equals("Q_CFH_NMINS"))) // TODO for all of our experiments CFH
+					&& (s.getSampleTypeCode().equals("Q_CFH_ELEMENTS") || s.getSampleTypeCode().equals("Q_CFH_NMINS") || s.getSampleTypeCode().equals("Q_CFH_NMR_RUN"))) // TODO for all of our experiments CFH
 				samples.add(s);
 			if (sampleType.equals(s.getSampleTypeCode()))
 				samples.add(s);
@@ -1851,7 +1851,7 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     String header = "QBiC Code\tSecondary Name\tLab ID\tSample Type\tAttributes\tSource";
     if (!sampleType.equals("Q_BIOLOGICAL_ENTITY"))
       header += "\tSource Name(s)\tSource Lab ID(s)";
-    if (sampleType.equals("Q_TEST_SAMPLE") || sampleType.equals("Q_CFH_ELEMENTS") || sampleType.equals("Q_CFH_NMINS")) // TODO for all of our experiments CFH
+    if (sampleType.equals("Q_TEST_SAMPLE") || sampleType.equals("Q_CFH_ELEMENTS") || sampleType.equals("Q_CFH_NMINS") || sampleType.equals("Q_CFH_NMR_RUN")) // TODO for all of our experiments CFH
       header += "\tExtract Code(s)\tExtract Name(s)\tExtract Lab ID(s)";
     res.add(header);
     for (Sample sample : samples) {
