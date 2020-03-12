@@ -398,6 +398,48 @@ public class OpenBisClient implements IOpenBisClient, Serializable {
     }
     return foundSamples;
   }
+  
+  
+  /**
+   * Function to get all samples of a specific project by experiment type
+   * 
+   * @param projIdentifierOrCode identifier of the openBIS project
+   * @return list with all samples connected to the given project
+   */
+  public List<List<Sample>> getSamplesOfProjectByExpType(String projIdentifier, String expType) {
+    ensureLoggedIn();
+    List<String> projects = new ArrayList<String>();
+    List<Project> foundProjects = facade.listProjects();
+    //List<Sample> foundSamples = new ArrayList<Sample>();
+    List<List<Sample>> sampleList = new ArrayList<List<Sample>>();
+    for (Project proj : foundProjects) {
+      if (projIdentifier.equals(proj.getIdentifier())) {
+        projects.add(proj.getIdentifier());
+      }
+    }
+    if (projects.size() > 0) {
+      List<Experiment> foundExp = facade.listExperimentsForProjects(projects);
+      for (Experiment exp : foundExp) {
+    	
+        if (exp.getExperimentTypeCode().equals(expType)) {
+        	
+    	  // TODO search service?
+        /*
+         * SearchCriteria sc = new SearchCriteria(); SearchCriteria ec = new SearchCriteria();
+         * ec.addMatchClause(MatchClause.createAttributeMatch(MatchClauseAttribute.CODE,
+         * exp.getIdentifier())); sc.addSubCriteria(SearchSubCriteria.createExperimentCriteria(ec));
+         */   
+        	List<Sample> foundSamples = new ArrayList<Sample>();
+        	foundSamples.addAll(getSamplesofExperiment(exp.getIdentifier()));
+        	sampleList.add(foundSamples);    
+           
+        }
+
+      }
+    }
+   
+    return sampleList;
+  }
 
   /**
    * Function to get all samples of a specific project
